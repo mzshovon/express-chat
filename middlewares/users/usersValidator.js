@@ -1,6 +1,7 @@
 const {check, validationResult} = require('express-validator');
 const createError = require('http-errors');
 const {unlink} = require('fs');
+const path = require("path");
 
 // Model imports
 const User = require('../../models/Peoples');

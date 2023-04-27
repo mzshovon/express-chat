@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/Peoples');
 const {unlink} = require('fs');
+const path = require("path");
 
 async function getUsers(req, res, next) {
     try {
@@ -47,16 +48,14 @@ async function addUsers(req, res, next) {
 
 async function removeUser(req, res, next) {
     try {
-        const user = User.findByIdAndDelete({
+        const user = await User.findByIdAndDelete({
             _id : req.params.id
         });
         if(user.profile_image) {
             unlink(
-                path.join(__dirname, `../../public/profileImages/${user.profile_image}`),
-                (fileUploadErr) => {
-                    if(fileUploadErr) {
-                        console.log(fileUploadErr);
-                    }
+                path.join(__dirname, `../public/profileImages/${user.profile_image}`),
+                (err) => {
+                  if (err) console.log(err);
                 }
             );
         }

@@ -38,6 +38,17 @@
     <%- include('./partials/add-user-modal.ejs'); %>
 
     <script>
+
+      // toasts
+      const deleteToast = Toastify({
+        text: "User was deleted successfully!",
+        duration: 3000,
+      });
+      const deleteErrorToast = Toastify({
+          text: "Could not delete the user!",
+          duration: 3000,
+      });
+
       async function deleteUser(userId) {
         let response = await fetch(`/users/${userId}`, {
           method : "DELETE"
@@ -45,6 +56,7 @@
 
         let result = await response.json();
         if(result.errors) {
+          console.log(errors);
           deleteErrorToast.showToast();
         } else {
           deleteToast.showToast();
