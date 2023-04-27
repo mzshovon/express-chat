@@ -23,8 +23,8 @@
         <input type="password" placeholder="enter password" name="password" />
         <p class="error password-error"></p>
 
-        <input type="file" name="avatar" />
-        <p class="error avatar-error"></p>
+        <input type="file" name="profile_image" />
+        <p class="error profile_image-error"></p>
 
         <p class="error common-error"></p>
 
@@ -81,6 +81,7 @@
 
     // handle error and response
     if (result.errors) {
+      console.log(result.errors);
       // errors
       Object.keys(result.errors).forEach((fieldName) => {
         // add error class to all inputs
