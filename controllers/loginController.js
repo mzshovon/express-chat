@@ -17,10 +17,12 @@ async function loginUser(req, res, next) {
             const validatePassword = await bcrypt.compare(req.body.password, user.password);
             if(validatePassword) {
                 const userObject = {
+                    userId : user._id,
                     username : user.name,
                     email : user.email,
                     mobile : user.mobile,
                     role : user.role,
+                    profile_image : user.profile_image
                 };
                 const token = jwt.sign(userObject, process.env.JWT_SECRET_KEY, {
                     expiresIn : process.env.JWT_EXPIRY

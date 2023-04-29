@@ -1,22 +1,46 @@
 // External imports
 const express = require('express');
+const http = require("http");
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const moment = require('moment');
 // Routes imports
 const loginRouter = require('./router/loginRouter');
 const usersRouter = require('./router/usersRouter');
 const inboxRouter = require('./router/inboxRouter');
-
+const { Server } = require("socket.io");
 //Internal imports
 const {notFoundHandler, errorHandler} = require('./middlewares/common/errorHandler');
 
 // For Routing
 const app = express();
+const server = http.createServer(app);
+dotenv.config();
+
+// socket creation
+// const io = new Server(server);
+const io =new Server(server, {
+  cors : {
+    origin : process.env.APP_URL,
+    methods : ["GET", "PUT", "POST", "DELETE"]
+  }
+});
+global.io = io;
+// Set moment as local var
+app.locals.moment = moment;
 
 // For getting .env property
 dotenv.config();
+
+// app.use( (req, res, next) => {
+//     res.header("Access-Control-Allow-Origin", `http://localhost:${process.env.APPLICATION_PORT}`); //The ionic server
+//     res.header("Access-Control-Allow-Credentials", "true");
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+// });
+
 
 // Database connection
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING, {
