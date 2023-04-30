@@ -89,7 +89,7 @@
 
         // set all error placeholders (p tag) textContent
         const errorPlaceholder = document.querySelector(`.${fieldName}-error`);
-        errorPlaceholder.textContent = result.errors[fieldName].msg;
+        errorPlaceholder.textContent = result.errors[fieldName].message;
 
         // make all placeholders visible
         errorPlaceholder.style.display = "block";

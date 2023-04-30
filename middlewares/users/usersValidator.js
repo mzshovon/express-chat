@@ -73,9 +73,17 @@ const checkUserRegistrationValidityResponse = function(req, res, next) {
                 }
             );
         }
-        res.status(500).json({
+        // res.status(500).json({
+        //     errors : prettyErrorFormat
+        // });
+        res.render("register", {
+            data : {
+                name : req.body.name,
+                email : req.body.email,
+                mobile : req.body.mobile,
+            },
             errors : prettyErrorFormat
-        });
+        })
     }
 }
 

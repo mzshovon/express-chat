@@ -7,6 +7,47 @@ function getLogin(req, res, next) {
     res.render("index");
 }
 
+function getRegister(req, res, next) {
+    res.render("register");
+}
+
+async function registerUser(req, res, next) {
+    try {
+        let newUser;
+        const hashedPassword = await bcrypt.hash(req.body.password, 12);
+        if(req.files && req.files.length > 0) {
+            newUser = new User({
+                ...req.body,
+                profile_image : req.files[0].filename,
+                password : hashedPassword
+            });
+        } else {
+            newUser = new User({
+                ...req.body,
+                password : hashedPassword
+            });
+        }
+        await newUser.save();
+        // res.status(200).json({
+        //     message : "User Added Successfully"
+        // });
+        res.redirect("/");
+    } catch (err) {
+        res.render("register", {
+            data : {
+                name : req.body.name,
+                email : req.body.email,
+                mobile : req.body.mobile,
+            },
+            errors : {
+                common : {
+                    message : error.message
+                }
+            }
+        })
+    }
+}
+
 async function loginUser(req, res, next) {
     try {
         const user = await User.findOne({
@@ -21,8 +62,8 @@ async function loginUser(req, res, next) {
                     username : user.name,
                     email : user.email,
                     mobile : user.mobile,
-                    role : user.role,
-                    profile_image : user.profile_image
+                    role : user.role || "user",
+                    profile_image : user.profile_image || null
                 };
                 const token = jwt.sign(userObject, process.env.JWT_SECRET_KEY, {
                     expiresIn : process.env.JWT_EXPIRY
@@ -34,7 +75,7 @@ async function loginUser(req, res, next) {
                 });
 
                 res.locals.loggedInUser = userObject;
-                res.render("inbox");
+                res.redirect("inbox");
             } else {
                 throw createError("Wrong password given!");
             }
@@ -63,6 +104,8 @@ function logout(req, res) {
 
 module.exports = {
     getLogin,
+    getRegister,
+    registerUser,
     loginUser,
     logout
 };

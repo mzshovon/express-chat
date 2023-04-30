@@ -15,12 +15,12 @@
             value="<%= data.username %>"
           />
           <% if(errors.username) { %>
-          <p class="error show"><%= errors.username.message %></p>
+          <p class="error show"><%= errors.username.msg %></p>
           <% }%>
           
           <input type="password" name="password" placeholder="enter password" />
           <% if(errors.password) { %>
-            <p class="error show"><%= errors.password.message %></p>
+            <p class="error show"><%= errors.password.msg %></p>
             <% }%>
 
           <% if(errors.common) { %>

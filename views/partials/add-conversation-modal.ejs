@@ -79,17 +79,17 @@
     // handle error and response
     if (result.errors) {
       const errorplaceholder = document.querySelector("p.error");
-      errorplaceholder.textContent = result.errors.common.msg;
+      errorplaceholder.textContent = result.errors.common.message;
       errorplaceholder.style.display = "block";
     } else {
       if (result.length > 0) {
         let generatedHtml = "<ul>";
         result.forEach((user) => {
-          const avatar = user.avatar
-            ? "./uploads/avatars/" + user.avatar
+          const avatar = user.profile_image
+            ? "./profileImages/" + user.profile_image
             : "./images/nophoto.png";
 
-          generatedHtml += `<li onclick="createConversation('${user._id}', '${user.name}', '${user.avatar}')">
+          generatedHtml += `<li onclick="createConversation('${user._id}', '${user.name}', '${user.profile_image}')">
               <div class="user">
                 <div class="avatar">
                   <img src="${avatar}" />
@@ -131,7 +131,7 @@
           location.reload();
         }, 1000);
       } else {
-        throw new Error(result.errors.common.msg);
+        throw new Error(result.errors.common.message);
       }
     } catch (err) {
       conversationFailureToast.showToast();

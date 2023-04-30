@@ -494,7 +494,8 @@ input[type="submit"]:active {
 }
 
 .other-message .message-text {
-  background: var(--blue);
+  background: #ede9e9;
+  /* background: var(--blue); */
   color: #111;
   border: 2px solid var(--dark);
   border-radius: 14px 14px 0 14px;

@@ -1,7 +1,7 @@
 const {check, validationResult} = require('express-validator');
 
 // Model imports
-const User = require('../../models/Peoples');
+// const User = require('../../models/Peoples');
 const loginValidator = [
     check("username")
         .isLength({min : 1})

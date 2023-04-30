@@ -1,0 +1,49 @@
+<%- include('./partials/header.ejs'); %>
+
+    <div id="login-container">
+      <div id="left-column"></div>
+      <div id="branding">
+        <img src="./images/registration.svg" />
+        <h1>Register - Chat Application</h1>
+      </div>
+      <div id="login-form">
+        <form method="post" action="/register" enctype="multipart/form-data">
+          <input
+            type="text"
+            name="name"
+            placeholder="enter name"
+            value="<%= data.name %>"
+          />
+          <% if(errors.name) { %>
+          <p class="error show"><%= errors.name.msg %></p>
+          <% }%>
+          
+          <input type="email" name="email" placeholder="enter email" value="<%= data.email %>"/>
+          <% if(errors.email) { %>
+            <p class="error show"><%= errors.email.msg %></p>
+            <% }%>
+
+          <input type="text" name="mobile" placeholder="enter mobile" value="<%= data.mobile %>"/>
+          <% if(errors.mobile) { %>
+            <p class="error show"><%= errors.mobile.msg %></p>
+            <% }%>
+
+          <input type="password" name="password" placeholder="enter password" />
+          <% if(errors.password) { %>
+            <p class="error show"><%= errors.password.msg %></p>
+            <% }%>
+
+        <input type="file" name="profile_image" />
+        <% if(errors.profile_image) { %>
+            <p class="error show"><%= errors.profile_image.msg %></p>
+            <% }%>
+
+          <% if(errors.common) { %>
+            <p class="error show"><%= errors.common.msg %></p>
+            <% }%>
+          <input type="submit" value="Register" />
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

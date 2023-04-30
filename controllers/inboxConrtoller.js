@@ -34,7 +34,12 @@ async function searchUser(req, res, next) {
     try {
       if (searchQuery !== "") {
         const users = await User.find(
-          {
+          {            
+            _id : {
+                $nin : [
+                  req.user.userId
+                ]
+              },
             $or: [
               {
                 name: name_search_regex,
@@ -55,6 +60,7 @@ async function searchUser(req, res, next) {
         throw createError("You must provide some text to search!");
       }
     } catch (err) {
+      console.log(err);
       res.status(500).json({
         errors: {
           common: {

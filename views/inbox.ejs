@@ -8,18 +8,19 @@
           <!-- conversation creator is same to logged in user, so we need to show participant name and avatar -->
           <% if(conversation.creator.id == loggedInUser.userId) { %>
             <div class="conversation" onclick="getMessages('<%= conversation._id %>', '<%= conversation.participant.name %>')">
-              <% if (conversation.participant.avatar) { %>
-              <img src="./uploads/avatars/<%= conversation.participant.avatar %>" alt="<%= conversation.participant.name %>" />
+              <% if (conversation.participant.profile_image) { %>
+              <img src="./profileImages/<%= conversation.participant.profile_image %>" alt="<%= conversation.participant.name %>" />
               <% } else { %>
                 <img src="./images/nophoto.png" />
               <% } %>
               <div class="title-text"><%= conversation.participant.name %></div>
               <div class="conversation-date"><%= moment(conversation.last_updated).fromNow() %></div>
+              <div class="conversation-date"><%= conversation.participant.profile_image %></div>
             </div>
           <% } else { %>
             <div class="conversation" onclick="getMessages('<%= conversation._id %>', '<%= conversation.creator.name %>')">
-              <% if (conversation.creator.avatar) { %>
-              <img src="./uploads/avatars/<%= conversation.creator.avatar %>" alt="<%= conversation.creator.name %>" />
+              <% if (conversation.creator.profile_image) { %>
+              <img src="./profileImages/<%= conversation.creator.profile_image %>" alt="<%= conversation.creator.name %>" />
               <% } else { %>
                 <img src="./images/nophoto.png" />
               <% } %>
@@ -41,7 +42,7 @@
 
       <div id="chat-title">
         <span id="conversation-partner"></span>
-        <img src="./images/trash.png" alt="Delete Conversation" />
+        <img src="./images/zoom.png" alt="Delete Conversation" onclick="videoCalling()"/>
       </div>
 
       <!-- placeholder div if no messages are in messages area -->
@@ -73,7 +74,7 @@
       
       // socket initialization
       const socket = io('<%= process.env.APP_URL %>');
-      console.log(socket);
+      // console.log(socket);
       // handle new/live incoming message from socket
       socket.on("new_message", data => {
         // only respond if current conversation is open in any client
@@ -81,7 +82,7 @@
           // message class
           const messageClass = data.message.sender.id === loggedinuserId ? 'you-message' : 'other-message';
           
-          const senderAvatar = data.message.sender.avatar ? `<img src="./uploads/avatars/${data.message.sender.avatar}" alt="${data.message.sender.name}" />` : `<img src="./images/nophoto.png" alt="${data.message.sender.name}" />`;
+          const senderAvatar = data.message.sender.profile_image ? `<img src="./profileImages/${data.message.sender.profile_image}" alt="${data.message.sender.name}" />` : `<img src="./images/nophoto.png" alt="${data.message.sender.name}" />`;
 
           // message attachments
           let attachments = '<div class="attachments">';
@@ -143,7 +144,7 @@
 
               if(data.messages.length > 0) {
                 data.messages.forEach((message) => {
-                  let senderAvatar = message.sender.avatar ? `./uploads/avatars/${message.sender.avatar}` : './images/nophoto.png';
+                  let senderAvatar = message.sender.profile_image ? `./profileImages/${message.sender.profile_image}` : './images/nophoto.png';
                   const messageClass = message.sender.id === loggedinuserId ? 'you-message' : 'other-message';
                   const showAvatar = message.sender.id === loggedinuserId ? '' : `<img src="${senderAvatar}" alt="${message.sender.name}" />`;
 
@@ -193,7 +194,7 @@
         const formData = new FormData(form);
         formData.append('receiverId', participant.id);
         formData.append('receiverName', participant.name);
-        formData.append('avatar', participant.avatar || '');
+        formData.append('avatar', participant.profile_image || '');
         formData.append('conversationId', current_conversation_id);
 
         // send the request to server
@@ -211,6 +212,29 @@
           sendMessageFailureToast.showToast();
         }
       }
+
+      function videoCalling() {
+        let myVideoStream;
+        const videoGrid = document.getElementById("chat-message-list");
+        const myVideo = document.createElement("video");
+        myVideo.muted = true;
+        navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true,
+        })
+        .then((stream) => {
+            myVideoStream = stream;
+            addVideoStream(myVideo, stream, videoGrid);
+        });
+      }
+
+      const addVideoStream = (video, stream, videoGrid) => {
+          video.srcObject = stream;
+          video.addEventListener("loadedmetadata", () => {
+            video.play();
+            videoGrid.append(video);
+          });
+      };
       
     </script>
   </body>
