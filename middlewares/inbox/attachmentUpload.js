@@ -2,7 +2,7 @@ const uploader = require("../../utilites/multipleUploader");
 
 function attachmentUpload(req, res, next) {
   const upload = uploader(
-    "attachments",
+    "attachments", 
     ["image/jpeg", "image/jpg", "image/png"],
     1000000,
     2,
@@ -12,6 +12,7 @@ function attachmentUpload(req, res, next) {
   // call the middleware function
   upload.any()(req, res, (err) => {
     if (err) {
+      console.log(err);
       res.status(500).json({
         errors: {
           avatar: {

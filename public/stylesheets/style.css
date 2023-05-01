@@ -466,6 +466,13 @@ input[type="submit"]:active {
   width: 32px;
 }
 
+.attachments img {
+  border-radius : 20px!important;
+  width: 100px;
+  height: 100px;
+  border: 2px solid #61dac9;
+}
+
 .you-message {
   justify-content: end;
 }
@@ -514,6 +521,13 @@ input[type="submit"]:active {
   color: #111;
   border: 2px solid var(--dark);
   border-radius: 14px 14px 0 14px;
+}
+
+.other-message .message-content .attachments img {
+  border-radius : 20px!important;
+  width: 100px!important;
+  height: 100px!important;
+  border: 2px solid #61dac9!important;
 }
 
 #chat-form {

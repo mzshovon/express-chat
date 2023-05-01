@@ -11,7 +11,7 @@ function uploader(
   error_message
 ) {
   // File upload folder
-  const UPLOADS_FOLDER = `${__dirname}/../uploads/${subfolder_path}/`;
+  const UPLOADS_FOLDER = `${__dirname}/../public/${subfolder_path}/`;
 
   // define the storage
   const storage = multer.diskStorage({

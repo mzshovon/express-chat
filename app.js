@@ -60,13 +60,6 @@ app.use('/inbox', inboxRouter);
 
 const peerServer = PeerServer({port : 9191, path: "/peerjs"});
 
-// app.use("/peerjs", peerServer);
-
-peerServer.on('connection', function(id) {
-    console.log("id for peerserver",id)
-    console.log(server._clients)
-});
-
 io.on('connection', socket => {
     socket.on('join-room', (roomId, userId) => {
       socket.join(roomId)
