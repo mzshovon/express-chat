@@ -1,5 +1,5 @@
 const express = require('express');
-const {getInbox, searchUser, sendMessage, addConversation, getMessages} = require('../controllers/inboxConrtoller');
+const {getInbox, searchUser, sendMessage, addConversation, getMessages, videoCall, getRoom} = require('../controllers/inboxConrtoller');
 const decorateHtmlResponse = require('../middlewares/common/decorateHtmlRespose');
 const {checkLogin} = require('../middlewares/common/checkLogin');
 const attachmentUpload = require('../middlewares/inbox/attachmentUpload');
@@ -21,5 +21,9 @@ router.get("/messages/:conversation_id", checkLogin, getMessages);
 
 // send message
 router.post("/message", checkLogin, attachmentUpload, sendMessage);
+
+router.get("/videoCall", decorateHtmlResponse(page_title), checkLogin, videoCall);
+
+router.get("/videoCall/:room", decorateHtmlResponse(page_title), checkLogin, getRoom);
 
 module.exports = router;

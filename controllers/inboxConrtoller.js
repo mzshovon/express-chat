@@ -2,6 +2,7 @@
 const createError = require("http-errors");
 // internal imports
 const User = require("../models/Peoples");
+const {v4 : uuidV4} = require('uuid');
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
 const escape = require("../utilites/escape");
@@ -201,10 +202,23 @@ async function searchUser(req, res, next) {
     }
   }
 
+async function getRoom(req,res) {
+  // console.log(req.param.roomId);
+  res.render("room", { 
+    roomId: req.params.room
+  });
+}
+
+async function videoCall(req,res,next) {
+  res.redirect(`/inbox/videoCall/${uuidV4()}`);
+}
+
 module.exports = {
     getInbox,
     searchUser,
     getMessages,
     addConversation,
-    sendMessage
+    sendMessage,
+    videoCall,
+    getRoom
 };

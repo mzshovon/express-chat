@@ -136,6 +136,21 @@ input[type="submit"]:active {
   border-image-source: linear-gradient(to left, var(--green), var(--blue));
 }
 
+.videoModal {
+  width: 950px;
+  z-index: 99;
+  left: 50%;
+  top: 50%;
+  position: absolute;
+  border-radius: 5px;
+  background-color: var(--primary);
+  transform: translateX(-50%) translateY(-50%);
+  border: 3px solid;
+  border-image-slice: 1;
+  border-width: 3px;
+  border-image-source: linear-gradient(to left, var(--green), var(--blue));
+}
+
 .modal .modal-title {
   padding: 2rem;
   color: var(--light);

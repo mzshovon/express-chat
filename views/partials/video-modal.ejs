@@ -1,0 +1,48 @@
+<div class="modal-wrapper" id="set-video-modal">
+    <div class="videoModal">
+      <a href="#" onclick="closeVideoModal()" class="modal-close">+</a>
+      <div class="modal-title">
+        <h2>Calling ....</h2>
+      </div>
+      <div class="modal-body" id="video-modal">
+      </div>
+    </div>
+  </div>
+  <script defer src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.min.js"></script>
+  <script>
+    const videoModal = document.querySelector("#set-video-modal");
+  
+    function closeVideoModal() {
+      videoModal.style.display = "none";
+    }
+    function openVideoModal() {
+      videoModal.style.display = "block";
+      videoCalling();
+    }
+
+    function videoCalling() {
+        let myVideoStream;
+        const videoGrid = document.getElementById("video-modal");
+        const myVideo = document.createElement("video");
+        myVideo.muted = true;
+        navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: true,
+        })
+        .then((stream) => {
+            myVideoStream = stream;
+            addVideoStream(myVideo, stream, videoGrid);
+        });
+      }
+
+      const addVideoStream = (video, stream, videoGrid) => {
+          video.srcObject = stream;
+          video.addEventListener("loadedmetadata", () => {
+            video.play();
+            videoGrid.append(video);
+          });
+      };
+
+  </script>
+  

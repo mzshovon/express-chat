@@ -1,6 +1,7 @@
 // External imports
 const express = require('express');
 const http = require("http");
+const PeerServer = require("peer").PeerServer;
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
@@ -20,8 +21,11 @@ const server = http.createServer(app);
 dotenv.config();
 
 // socket creation
-const io = require("socket.io")(server);
+const io = require("socket.io")(server, {
+    allowEIO3: true
+});
 global.io = io;
+
 // Set moment as local var
 app.locals.moment = moment;
 
@@ -40,11 +44,11 @@ app.use(express.urlencoded({extended : true}));
 // Set the template engine
 app.set("view engine","ejs");
 
-// Set public file path
-app.use(express.static(path.join(__dirname, "public")));
-
 // Set the views
 app.set('views',  [path.join(__dirname, 'views'),path.join(__dirname, 'views/errors')]);
+
+// Set public file path
+app.use(express.static(path.join(__dirname, "public")));
 
 // Set the secret key
 app.use(cookieParser(process.env.COOKIE_PARSER_SECRET_KEY));
@@ -54,6 +58,26 @@ app.use('/', loginRouter);
 app.use('/users', usersRouter);
 app.use('/inbox', inboxRouter);
 
+const peerServer = PeerServer({port : 9191, path: "/peerjs"});
+
+// app.use("/peerjs", peerServer);
+
+peerServer.on('connection', function(id) {
+    console.log("id for peerserver",id)
+    console.log(server._clients)
+});
+
+io.on('connection', socket => {
+    socket.on('join-room', (roomId, userId) => {
+      socket.join(roomId)
+      socket.broadcast.to(roomId).emit('user-connected', userId)
+      // This line here
+  
+      socket.on('disconnect', () => {
+        socket.broadcast.to(roomId).emit('user-disconnected', userId)
+      })
+    })
+})
 // 404 error handler
 app.use(notFoundHandler);
 

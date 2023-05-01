@@ -42,7 +42,7 @@
 
       <div id="chat-title">
         <span id="conversation-partner"></span>
-        <img src="./images/zoom.png" alt="Delete Conversation" onclick="videoCalling()"/>
+        <img src="./images/zoom.png" alt="Delete Conversation" onclick="openVideoModal()"/>
       </div>
 
       <!-- placeholder div if no messages are in messages area -->
@@ -213,28 +213,6 @@
         }
       }
 
-      function videoCalling() {
-        let myVideoStream;
-        const videoGrid = document.getElementById("chat-message-list");
-        const myVideo = document.createElement("video");
-        myVideo.muted = true;
-        navigator.mediaDevices.getUserMedia({
-            audio: true,
-            video: true,
-        })
-        .then((stream) => {
-            myVideoStream = stream;
-            addVideoStream(myVideo, stream, videoGrid);
-        });
-      }
-
-      const addVideoStream = (video, stream, videoGrid) => {
-          video.srcObject = stream;
-          video.addEventListener("loadedmetadata", () => {
-            video.play();
-            videoGrid.append(video);
-          });
-      };
       
     </script>
   </body>
