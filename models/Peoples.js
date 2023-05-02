@@ -21,7 +21,8 @@ const peopleSchema = mongoose.Schema({
     },
     status : {
         type : String,
-        enum : ['active', 'inactive', 'blocked']
+        enum : ['active', 'inactive', 'blocked'],
+        default : "active"
     },
     profile_image : {
         type : String

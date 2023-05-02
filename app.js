@@ -1,6 +1,7 @@
 // External imports
 const express = require('express');
 const http = require("http");
+const cors = require("cors");
 const PeerServer = require("peer").PeerServer;
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -22,7 +23,10 @@ dotenv.config();
 
 // socket creation
 const io = require("socket.io")(server, {
-    allowEIO3: true
+    cors : {
+      origin : "*",
+      methods : ["GET", "PUT", "POST", "DELETE"]
+    }
 });
 global.io = io;
 
@@ -37,6 +41,7 @@ mongoose.connect(process.env.MONGODB_CONNECTION_STRING, {
     .then(()=> console.log('connection established successfully!'))
     .catch( err => console.log(err));
 
+app.use(cors());
 // For initializing form request property
 app.use(express.json());
 app.use(express.urlencoded({extended : true}));

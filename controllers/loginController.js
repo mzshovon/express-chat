@@ -62,6 +62,7 @@ async function loginUser(req, res, next) {
                     username : user.name,
                     email : user.email,
                     mobile : user.mobile,
+                    status : user.status,
                     role : user.role || "user",
                     profile_image : user.profile_image || null
                 };

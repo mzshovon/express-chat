@@ -7,7 +7,7 @@
         <% data.forEach(function(conversation) { %>
           <!-- conversation creator is same to logged in user, so we need to show participant name and avatar -->
           <% if(conversation.creator.id == loggedInUser.userId) { %>
-            <div class="conversation" onclick="getMessages('<%= conversation._id %>', '<%= conversation.participant.name %>')">
+            <div class="conversation" onclick="getMessages('<%= conversation._id %>', '<%= conversation.participant.name %>', '<%= conversation.participant.status %>')">
               <% if (conversation.participant.profile_image) { %>
               <img src="./profileImages/<%= conversation.participant.profile_image %>" alt="<%= conversation.participant.name %>" />
               <% } else { %>
@@ -121,7 +121,7 @@
       });
 
       // get messages of a conversation
-      async function getMessages(conversation_id, current_conversation_name){
+      async function getMessages(conversation_id, current_conversation_name, status){
 
         // messages failure toast
         const messagesFailureToast = Toastify({
@@ -148,6 +148,8 @@
                 data.messages.forEach((message) => {
                   let senderAvatar = message.sender.profile_image ? `./profileImages/${message.sender.profile_image}` : './images/nophoto.png';
                   const messageClass = message.sender.id === loggedinuserId ? 'you-message' : 'other-message';
+                  console.log(status);
+                  // const userStatus = message.sender.status === loggedinuserId ? 'you-message' : 'other-message';
                   const showAvatar = message.sender.id === loggedinuserId ? '' : `<img src="${senderAvatar}" alt="${message.sender.name}" />`;
 
                   // message attachments
@@ -177,6 +179,7 @@
               }
 
               chatTitleContainer.textContent = current_conversation_name;
+              chatTitleContainer.innerHTML = `${current_conversation_name} <button class="block_btn" type="button">Block</button>`;
             }
         } else {
           messagesFailureToast.showToast();

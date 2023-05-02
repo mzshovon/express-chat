@@ -30,9 +30,13 @@
   let users_placeholder = document.querySelector(".search_users");
 
   // conversation created failure toast
-  const conversationFailureToast = Toastify({
-    text: "Error creating a conversation!",
+  const conversationSuccessToast = Toastify({
+    text: "Conversation created successfully!",
     duration: 1000,
+  });
+  const conversationFailureToast = Toastify({
+    text: "Error creating a conversation! Conversation already exists or connection issue!",
+    duration: 2000,
   });
 
   function closeModal() {
@@ -89,7 +93,7 @@
             ? "./profileImages/" + user.profile_image
             : "./images/nophoto.png";
 
-          generatedHtml += `<li onclick="createConversation('${user._id}', '${user.name}', '${user.profile_image}')">
+          generatedHtml += `<li onclick="createConversation('${user._id}', '${user.name}', '${user.profile_image}', '${user.status}')">
               <div class="user">
                 <div class="avatar">
                   <img src="${avatar}" />
@@ -106,13 +110,15 @@
   }
 
   // create Conversation
-  async function createConversation(participant_id, name, avatar) {
+  async function createConversation(participant_id, name, avatar, status) {
     try {
+      console.log(status);
       const response = await fetch("/inbox/conversation", {
         method: "POST",
         body: JSON.stringify({
           participant: name,
           id: participant_id,
+          status: status ?? "active",
           avatar: avatar != "undefined" ? avatar : null,
         }),
         headers: {
@@ -120,16 +126,16 @@
         },
       });
 
-      const result = response.json();
-
+      const result = await response.json();
       if (!result.errors) {
         // reset
         users_placeholder.style.display = "none";
         input.value = name;
+        conversationSuccessToast.showToast();
         // reload the page after 1 second
         setTimeout(() => {
           location.reload();
-        }, 1000);
+        }, 2000);
       } else {
         throw new Error(result.errors.common.message);
       }

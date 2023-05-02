@@ -53,9 +53,8 @@ async function searchUser(req, res, next) {
               },
             ],
           },
-          "name profile_image"
+          "name profile_image status"
         );
-  
         res.json(users);
       } else {
         throw createError("You must provide some text to search!");
@@ -72,6 +71,55 @@ async function searchUser(req, res, next) {
     }
   }
   
+
+// search user
+async function blockUser(req, res, next) {
+    const user = req.body.user;
+    const searchQuery = user.replace("+88", "");
+  
+    const name_search_regex = new RegExp(escape(searchQuery), "i");
+    const mobile_search_regex = new RegExp("^" + escape("+88" + searchQuery));
+    const email_search_regex = new RegExp("^" + escape(searchQuery) + "$", "i");
+  
+    try {
+      if (searchQuery !== "") {
+        const users = await User.find(
+          {            
+            _id : {
+                $nin : [
+                  req.user.userId
+                ]
+              },
+            $or: [
+              {
+                name: name_search_regex,
+              },
+              {
+                mobile: mobile_search_regex,
+              },
+              {
+                email: email_search_regex,
+              },
+            ],
+          },
+          "name profile_image"
+        );
+        res.json(users);
+      } else {
+        throw createError("You must provide some text to search!");
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({
+        errors: {
+          common: {
+            message: err.message,
+          },
+        },
+      });
+    }
+}
+  
   // add conversation
   async function addConversation(req, res, next) {
     try {
@@ -79,19 +127,41 @@ async function searchUser(req, res, next) {
         creator: {
           id: req.user.userId,
           name: req.user.username,
+          status: req.user.status,
           profile_image: req.user.profile_image || null,
         },
         participant: {
           name: req.body.participant,
           id: req.body.id,
+          status : req.body.status,
           profile_image: req.body.profile_image || null,
         },
       });
-  
-      const result = await newConversation.save();
-      res.status(200).json({
-        message: "Conversation was added successfully!",
+      const findAlreadyExistsConversation = await Conversation.find({
+        $and : [
+          {
+            $or : [
+              { "creator.id": req.user.userId },
+              { "participant.id": req.user.userId },
+            ],
+          },
+          {
+          $or : [
+            { "creator.id": req.body.id },
+            { "participant.id": req.body.id },
+          ],
+        },
+        ],
       });
+      if(findAlreadyExistsConversation.length > 0) {
+        throw createError("Users already exists");
+      }
+      else {
+        const result = await newConversation.save();
+        res.status(200).json({
+          message: "Conversation was added successfully!",
+        });
+      }
     } catch (err) {
       res.status(500).json({
         errors: {
@@ -220,5 +290,6 @@ module.exports = {
     addConversation,
     sendMessage,
     videoCall,
-    getRoom
+    getRoom,
+    blockUser
 };
