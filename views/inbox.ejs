@@ -51,11 +51,10 @@
       <div id="chat-message-list">
         <div class="nothing">select a conversation</div>
       </div>
-
       <form id="chat-form" method="post" enctype="multipart/form-data">
         <label for="attachment"><img src="./images/attachment.png" alt="Add Attachment" /></label>
         <input type="file" multiple name="attachment" class="hide" id="attachment" />
-        <input type="text" name="message" placeholder="Type a message" autocomplete="off" />
+        <input type="text" name="message" placeholder="Type a message" autocomplete="off" onkeypress="showTypingInRealTime(event)"/>
       </form>
 
     </div>
@@ -72,6 +71,8 @@
       const loggedinUserName = '<%= loggedInUser.username %>';
       let participant = null; // selected conversation participant object
       let current_conversation_id; // selected conversation id
+      var typing=false;
+      var timeout=undefined;
 
       const blockSuccessfull = Toastify({
         text: "User status changed successfully!",
@@ -81,10 +82,10 @@
         text: "Error changing status! Please contact with admin",
         duration: 2000,
       });
-      
+
       // socket initialization
       const socket = io('<%= process.env.APP_URL %>');
-      // console.log(socket);
+
       // handle new/live incoming message from socket
       socket.on("new_message", data => {
         // only respond if current conversation is open in any client
@@ -201,9 +202,15 @@
               } else {
                 blockButton = blockButtonDesign;
               }
-              
+              let typingDisplay = `<span id="typingId" style="color: black;
+                                              font-size: 12px;
+                                              margin-left: 5px;
+                                              padding: 7px;
+                                              background: white;
+                                              visibility: hidden;
+                                              border-radius: 14px 14px 0 14px;"></span>`;
               chatTitleContainer.textContent = current_conversation_name;
-              chatTitleContainer.innerHTML = `${current_conversation_name} ${blockButton}`;
+              chatTitleContainer.innerHTML = `${current_conversation_name} ${blockButton} ${typingDisplay}`;
             }
         } else {
           messagesFailureToast.showToast();
@@ -273,6 +280,36 @@
         }
       }
       
+      function showTypingInRealTime(e) {
+        let blockButtonPosition = document.getElementById("typingId");
+        if(e.which!=13){
+          typing=true;
+          socket.emit('typing', {user:{id : loggedinuserId, name : loggedinUserName}, typing:true});
+          clearTimeout(timeout);
+          timeout=setTimeout(typingTimeout, 2000);
+        }else{
+          clearTimeout(timeout);
+          typingTimeout();
+        }
+        socket.on('display', (data)=>{
+          if(data.typing==true){
+            if(loggedinuserId != data.user.id) {
+              
+              blockButtonPosition.innerText = `${data.user.name} typing....`;
+              blockButtonPosition.style.visibility = "visible";
+            }
+          }
+          else{
+            blockButtonPosition.style.visibility = "hidden";
+          }
+        });
+      }
+      
+      function typingTimeout(){
+          typing=false;
+          socket.emit('typing', {user:user, typing:false})
+      }
+
     </script>
   </body>
 </html>

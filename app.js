@@ -75,6 +75,13 @@ io.on('connection', socket => {
         socket.broadcast.to(roomId).emit('user-disconnected', userId)
       })
     })
+
+    socket.on('typing', (data)=>{
+      if(data.typing==true)
+         io.emit('display', data);
+      else
+         io.emit('display', data);
+    })
 })
 // 404 error handler
 app.use(notFoundHandler);

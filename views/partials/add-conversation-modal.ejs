@@ -112,7 +112,6 @@
   // create Conversation
   async function createConversation(participant_id, name, avatar, status) {
     try {
-      console.log(status);
       const response = await fetch("/inbox/conversation", {
         method: "POST",
         body: JSON.stringify({
@@ -127,6 +126,7 @@
       });
 
       const result = await response.json();
+      console.log(result);
       if (!result.errors) {
         // reset
         users_placeholder.style.display = "none";

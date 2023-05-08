@@ -85,9 +85,10 @@ async function addConversation(req, res, next) {
         name: req.body.participant,
         id: req.body.id,
         status : req.body.status,
-        profile_image: req.body.profile_image || nlull,
+        profile_image: req.body.profile_image || null,
       },
     });
+    console.log(newConversation, 'test');
     const findAlreadyExistsConversation = await Conversation.find({
       $and : [
         {
@@ -114,6 +115,7 @@ async function addConversation(req, res, next) {
       });
     }
   } catch (err) {
+    console.log(err);
     res.status(500).json({
       errors: {
         common: {
