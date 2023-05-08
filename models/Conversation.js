@@ -7,6 +7,7 @@ const conversationSchema = mongoose.Schema(
       name: String,
       status: String,
       avatar: String,
+      blockedBy : String
     },
 
     participant: {
@@ -14,6 +15,7 @@ const conversationSchema = mongoose.Schema(
       name: String,
       status: String,
       avatar: String,
+      blockedBy : String
     },
     last_updated: {
       type: Date,

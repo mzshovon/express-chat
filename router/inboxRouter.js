@@ -13,9 +13,6 @@ router.get("/", decorateHtmlResponse(page_title), checkLogin, getInbox);
 // search user for conversation
 router.post("/search", checkLogin, searchUser);
 
-// search user for conversation
-router.post("/block", checkLogin, blockUser);
-
 // add conversation
 router.post("/conversation", checkLogin, addConversation);
 
@@ -24,6 +21,9 @@ router.get("/messages/:conversation_id", checkLogin, getMessages);
 
 // send message
 router.post("/message", checkLogin, attachmentUpload, sendMessage);
+
+// search user for conversation
+router.post("/block", checkLogin, blockUser);
 
 router.get("/videoCall", decorateHtmlResponse(page_title), checkLogin, videoCall);
 

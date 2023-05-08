@@ -18,7 +18,7 @@
               <div class="conversation-date"><%= conversation.participant.profile_image %></div>
             </div>
           <% } else { %>
-            <div class="conversation" onclick="getMessages('<%= conversation._id %>', '<%= conversation.creator.name %>')">
+            <div class="conversation" onclick="getMessages('<%= conversation._id %>', '<%= conversation.creator.name %>' , '<%= conversation.participant.status %>')">
               <% if (conversation.creator.profile_image) { %>
               <img src="./profileImages/<%= conversation.creator.profile_image %>" alt="<%= conversation.creator.name %>" />
               <% } else { %>
@@ -52,7 +52,6 @@
         <div class="nothing">select a conversation</div>
       </div>
 
-      <!-- send message form -->
       <form id="chat-form" method="post" enctype="multipart/form-data">
         <label for="attachment"><img src="./images/attachment.png" alt="Add Attachment" /></label>
         <input type="file" multiple name="attachment" class="hide" id="attachment" />
@@ -73,6 +72,15 @@
       const loggedinUserName = '<%= loggedInUser.username %>';
       let participant = null; // selected conversation participant object
       let current_conversation_id; // selected conversation id
+
+      const blockSuccessfull = Toastify({
+        text: "User status changed successfully!",
+        duration: 1000,
+      });
+      const blockFailed = Toastify({
+        text: "Error changing status! Please contact with admin",
+        duration: 2000,
+      });
       
       // socket initialization
       const socket = io('<%= process.env.APP_URL %>');
@@ -120,9 +128,16 @@
         }
       });
 
+      function viewBlockOrUnblockMessages(status, form) {
+        if(status && status == "active") {
+            form.style.visibility = "visible";
+          } else {
+            form.style.visibility = 'hidden';
+          }
+      }
+
       // get messages of a conversation
       async function getMessages(conversation_id, current_conversation_name, status){
-
         // messages failure toast
         const messagesFailureToast = Toastify({
           text: "Error loading messages!",
@@ -130,11 +145,10 @@
         });
 
         let response = await fetch(`/inbox/messages/${conversation_id}`);
-        const result= await response.json();
+        let result= await response.json();
 
         if(!result.errors && result.data) {
-            form.style.visibility = 'visible';
-            
+            viewBlockOrUnblockMessages(status, form);
             const {data, user, conversation_id} = result;
 
             participant = data.participant;
@@ -148,7 +162,6 @@
                 data.messages.forEach((message) => {
                   let senderAvatar = message.sender.profile_image ? `./profileImages/${message.sender.profile_image}` : './images/nophoto.png';
                   const messageClass = message.sender.id === loggedinuserId ? 'you-message' : 'other-message';
-                  console.log(status);
                   // const userStatus = message.sender.status === loggedinuserId ? 'you-message' : 'other-message';
                   const showAvatar = message.sender.id === loggedinuserId ? '' : `<img src="${senderAvatar}" alt="${message.sender.name}" />`;
 
@@ -177,9 +190,20 @@
               } else if(data.messages.length === 0) {
                 messageContainer.innerHTML = '<div class="message-row"></div>';
               }
-
+              let blockOrUnblockButtonElement = participant.status == 'blocked' ? 'Unblock' : 'Block';
+              let blockButtonDesign = `<button class="block_btn" type="button" onclick="blockOrUnblockUser('${conversation_id}','${participant.id}')">
+                                                                      ${blockOrUnblockButtonElement}</button>`;
+              let blockButton = "";
+              if((participant.blockedBy && loggedinuserId == participant.blockedBy && participant.status == "blocked")) {
+                blockButton = blockButtonDesign;
+              } else if(participant.blockedBy && loggedinuserId != participant.blockedBy && participant.status == "blocked") {
+                blockButton = "You are not allowed to continue this conversation";
+              } else {
+                blockButton = blockButtonDesign;
+              }
+              
               chatTitleContainer.textContent = current_conversation_name;
-              chatTitleContainer.innerHTML = `${current_conversation_name} <button class="block_btn" type="button">Block</button>`;
+              chatTitleContainer.innerHTML = `${current_conversation_name} ${blockButton}`;
             }
         } else {
           messagesFailureToast.showToast();
@@ -210,7 +234,6 @@
 
         // get response
         let result = await response.json();
-
         if (!result.errors) {
           form.reset(); // reset the form
         } else {
@@ -218,6 +241,37 @@
         }
       }
 
+      async function blockOrUnblockUser(conversationId, participantId){
+        try{
+          let response = await fetch("/inbox/block", {
+            method: "POST",
+            body: JSON.stringify({
+              conversationId: conversationId,
+              participantId: participantId,
+            }),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+          });
+
+          // get response
+          const result = await response.json();
+          if (!result.errors) {
+            // reset
+            users_placeholder.style.display = "none";
+            input.value = name;
+            blockSuccessfull.showToast();
+            // reload the page after 1 second
+            setTimeout(() => {
+              location.reload();
+            }, 2000);
+          } else {
+            throw new Error(result.errors.common.message);
+          }
+        } catch (err) {
+          blockFailed.showToast();
+        }
+      }
       
     </script>
   </body>
