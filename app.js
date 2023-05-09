@@ -12,6 +12,7 @@ const moment = require('moment');
 const loginRouter = require('./router/loginRouter');
 const usersRouter = require('./router/usersRouter');
 const inboxRouter = require('./router/inboxRouter');
+const facebookRouter = require('./router/facebookRouter');
 
 //Internal imports
 const {notFoundHandler, errorHandler} = require('./middlewares/common/errorHandler');
@@ -62,6 +63,7 @@ app.use(cookieParser(process.env.COOKIE_PARSER_SECRET_KEY));
 app.use('/', loginRouter);
 app.use('/users', usersRouter);
 app.use('/inbox', inboxRouter);
+app.use('/facebook', facebookRouter);
 
 const peerServer = PeerServer({port : 9191, path: "/peerjs"});
 
