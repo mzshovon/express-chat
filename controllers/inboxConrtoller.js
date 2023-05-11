@@ -262,7 +262,18 @@ async function blockUser(req, res, next) {
   }
 }
 async function getRoom(req,res) {
-  // console.log(req.param.roomId);
+  const urlParamElements = req.params.room.split("!");
+  const callerId = urlParamElements[0];
+  const conversationInfo = await Conversation.findOne({_id : urlParamElements[2].split(".")[1]});
+  global.io.emit("video_call_request", {
+    videoRecieverInfo : {
+      callerId : conversationInfo.creator.id == callerId ? callerId : conversationInfo.participant.id,
+      receiverId : conversationInfo.creator.id == callerId ? conversationInfo.participant.id : conversationInfo.creator.id,
+      callerInfo : conversationInfo.creator.id == callerId ? conversationInfo.creator : conversationInfo.participant,
+      redirectUrl : req.params.room,
+    }
+    });
+
   res.render("room", { 
     roomId: req.params.room
   });

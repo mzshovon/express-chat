@@ -30,7 +30,7 @@ const io = require("socket.io")(server, {
     }
 });
 global.io = io;
-
+global.activeUsers = {}
 // Set moment as local var
 app.locals.moment = moment;
 

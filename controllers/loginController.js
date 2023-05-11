@@ -76,6 +76,7 @@ async function loginUser(req, res, next) {
                 });
 
                 res.locals.loggedInUser = userObject;
+                global.io.emit("login" , { activeUsers : { 'userId' : user._id } });
                 res.redirect("inbox");
             } else {
                 throw createError("Wrong password given!");
