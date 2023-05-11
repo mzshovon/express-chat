@@ -327,7 +327,6 @@
       }
 
       socket.on("video_call_request", data => {
-        console.log(data);
         if(data.videoRecieverInfo.receiverId == loggedinuserId) {
           videoCallRequestAlertBox(data.videoRecieverInfo.callerInfo.name, data.videoRecieverInfo.redirectUrl);
         }
@@ -335,22 +334,22 @@
 
       async function startVideoCall(participantId, participantName, conversation_id){
         let randomizeUrlCall = `${loggedinuserId}!${Math.random()}!.${conversation_id}`;
-
-        let formData = {
-          message : `You are invited to join in this video call Link: <a href='/inbox/videoCall/${randomizeUrlCall}' target="_blank">Call Link</a>`,
-          receiverId : participantId,
-          receiverName : participantName,
-          profile_image : null,
-          conversationId : conversation_id,
-          files : null,
-          attachment : null
-        };
-        let result = await formSubmitOnSendMessage(formData, true);
-        if (!result.errors) {
-          window.open(`/inbox/videoCall/${randomizeUrlCall}`,"_blank");
-        } else {
-          sendMessageFailureToast.showToast();
-        }
+        window.open(`/inbox/videoCall/${randomizeUrlCall}`,"_blank");
+        // let formData = {
+        //   message : `You are invited to join in this video call Link: <a href='/inbox/videoCall/${randomizeUrlCall}' target="_blank">Call Link</a>`,
+        //   receiverId : participantId,
+        //   receiverName : participantName,
+        //   profile_image : null,
+        //   conversationId : conversation_id,
+        //   files : null,
+        //   attachment : null
+        // };
+        // let result = await formSubmitOnSendMessage(formData, true);
+        // if (!result.errors) {
+        //   window.open(`/inbox/videoCall/${randomizeUrlCall}`,"_blank");
+        // } else {
+        //   sendMessageFailureToast.showToast();
+        // }
       }
 
       async function formSubmitOnSendMessage(formData, formDataHeader = false){
