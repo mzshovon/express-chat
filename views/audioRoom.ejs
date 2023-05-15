@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.111.3">
+    <title>Audio Template</title>
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.3/examples/sign-in/">
+    <link href="/audioBoot/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom styles for this template -->
+    <link href="/stylesheets/audioRoom.css" rel="stylesheet">
+  </head>
+  <body class="text-center">
+
+    
+    <main class="form-signin w-100 m-auto p-auto">
+        <div class="row">
+            <div class="col-md-6">
+                <img class="mb-4" src="/audioBoot/brand/headphone.png" alt="" width="150" height="150">
+                <p class="text-center" id="participant-name">Audio Calling....</p>
+            </div>
+            <div class="col-md-6">
+                <audio id="microphone" autoplay></audio>
+                <div class="wrap">
+                    <canvas id="canvas" width="400" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.min.js"></script>
+    <script>
+        const ROOM_ID = "<%= roomId %>";
+        const socket = io("/");
+        const myAudio = document.createElement("audio");
+        myAudio.muted = true;
+        var peer = new Peer(undefined, {
+            host: "/",
+            path: "/peerjs",
+            port: 9191
+        });
+        const peers = {};
+        let myAudioStream;
+        navigator.mediaDevices
+        .getUserMedia({
+            audio: true
+        })
+        .then((stream) => {
+            myAudioStream = stream;
+            console.log(document.getElementsByClassName("participant-name"));
+            addAudioStream(myAudio, stream);
+            peer.on("call", (call) => {
+                call.answer(stream);
+                const audio = document.createElement("audio");
+                call.on("stream", (userVideoStream) => {
+                    addAudioStream(audio, userVideoStream);
+                    audioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
+                    try {
+                        context = new audioContext();
+                    } catch (e) {
+                        console.log('not support AudioContext');
+                    }
+
+                    audioInput = context.createMediaStreamSource(stream);
+                    var binaryData = [];
+                    binaryData.push(stream);
+                    microphone.src = window.URL.createObjectURL(new Blob(binaryData, { type: 'application/zip' }));
+                    microphone.onloadedmetadata = function (e) { };
+                    var analyser = context.createAnalyser();
+                    audioInput.connect(analyser);
+
+                    drawSpectrum(analyser);
+                });
+            });
+            socket.on("user-connected", (userId) => {
+                connectToNewUser(userId, stream);
+            });
+        });
+
+        socket.on('user-disconnected', userId => {
+            if (peers[userId]) peers[userId].close()
+        });
+
+        peer.on("open", (id) => {
+            socket.emit("join-room", ROOM_ID, id);
+        });
+
+        const connectToNewUser = (userId, stream) => {
+            const call = peer.call(userId, stream);
+            const audio = document.createElement("audio");
+            call.on("stream", (userVideoStream) => {
+                addAudioStream(audio, userVideoStream);
+            });
+            call.on('close', () => {
+                audio.remove()
+            })
+
+            peers[userId] = call;
+        };
+
+        const addAudioStream = (audio, stream) => {
+            audio.srcObject = stream;
+            audio.addEventListener("loadedmetadata", () => {
+                audio.play();
+            });
+        // audioGrid.append(audio);
+        };
+
+        function drawSpectrum(analyser) {
+            var canvas = document.getElementById('canvas'),
+            cwidth = canvas.width,
+            cheight = canvas.height,
+            meterWidth = 8,
+            gap = 2,
+            meterNum = cwidth / (meterWidth + gap),
+
+            ctx = canvas.getContext('2d'),
+            gradient = ctx.createLinearGradient(0, 0, 0, cheight);
+            gradient.addColorStop(1, '#a467af');
+            gradient.addColorStop(0.3, '#ff0');
+            gradient.addColorStop(0, '#f00');
+            ctx.fillStyle = gradient;
+            var drawMeter = function () {
+            var array = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(array);
+
+            var step = Math.round(array.length / meterNum);
+            ctx.clearRect(0, 0, cwidth, cheight);
+            for (var i = 0; i < meterNum; i++) {
+                var value = array[i * step];
+
+                ctx.fillRect(i * (meterWidth + gap), cheight - value, meterWidth, cheight);
+            }
+            requestAnimationFrame(drawMeter);
+            }
+            requestAnimationFrame(drawMeter);
+        }
+    </script>
+  </body>
+</html>

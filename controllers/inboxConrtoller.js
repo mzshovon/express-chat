@@ -279,8 +279,31 @@ async function getRoom(req,res) {
   });
 }
 
+async function getAudioRoom(req,res) {
+  const urlParamElements = req.params.room.split("!");
+  const callerId = urlParamElements[0];
+  const conversationInfo = await Conversation.findOne({_id : urlParamElements[2].split(".")[1]});
+  global.io.emit("audio_call_request", {
+    videoRecieverInfo : {
+      callerId : conversationInfo.creator.id == callerId ? callerId : conversationInfo.participant.id,
+      receiverId : conversationInfo.creator.id == callerId ? conversationInfo.participant.id : conversationInfo.creator.id,
+      callerInfo : conversationInfo.creator.id == callerId ? conversationInfo.creator : conversationInfo.participant,
+      redirectUrl : req.params.room,
+    }
+    });
+
+  res.render("audioRoom", { 
+    roomId: req.params.room
+  });
+}
+
 async function videoCall(req,res,next) {
   res.redirect(`/inbox/videoCall/${uuidV4()}`);
+}
+
+async function audioCall(req,res,next) {
+  res.redirect(`/inbox/audioCall/${uuidV4()}`);
+  // res.render('audioRoom');
 }
 
 module.exports = {
@@ -291,5 +314,7 @@ module.exports = {
     sendMessage,
     blockUser,
     videoCall,
+    audioCall,
     getRoom,
+    getAudioRoom
 };

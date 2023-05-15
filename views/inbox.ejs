@@ -226,7 +226,7 @@
                                         padding: 7px 10px;
                                         border: 2px solid;
                                         margin: 0px 17px;
-                                        border-radius: 10px;" onclick="startVideoCall('${participant.id}','${participant.name}', '${conversation_id}')"></i>
+                                        border-radius: 10px;" onclick="startAudioCall('${participant.id}','${participant.name}', '${conversation_id}')"></i>
                                         <i class="fa-solid fa-video-camera" style="color:white;background: #6a6ab1;
                                         padding: 7px 10px;
                                         border: 2px solid;
@@ -332,24 +332,20 @@
         }
       })
 
+      socket.on("audio_call_request", data => {
+        if(data.videoRecieverInfo.receiverId == loggedinuserId) {
+          audioCallRequestAlertBox(data.videoRecieverInfo.callerInfo.name, data.videoRecieverInfo.redirectUrl);
+        }
+      })
+
       async function startVideoCall(participantId, participantName, conversation_id){
         let randomizeUrlCall = `${loggedinuserId}!${Math.random()}!.${conversation_id}`;
         window.open(`/inbox/videoCall/${randomizeUrlCall}`,"_blank");
-        // let formData = {
-        //   message : `You are invited to join in this video call Link: <a href='/inbox/videoCall/${randomizeUrlCall}' target="_blank">Call Link</a>`,
-        //   receiverId : participantId,
-        //   receiverName : participantName,
-        //   profile_image : null,
-        //   conversationId : conversation_id,
-        //   files : null,
-        //   attachment : null
-        // };
-        // let result = await formSubmitOnSendMessage(formData, true);
-        // if (!result.errors) {
-        //   window.open(`/inbox/videoCall/${randomizeUrlCall}`,"_blank");
-        // } else {
-        //   sendMessageFailureToast.showToast();
-        // }
+      }
+
+      async function startAudioCall(participantId, participantName, conversation_id){
+        let randomizeUrlCall = `${loggedinuserId}!${Math.random()}!.${conversation_id}`;
+        window.open(`/inbox/audioCall/${randomizeUrlCall}`,"_blank");
       }
 
       async function formSubmitOnSendMessage(formData, formDataHeader = false){
@@ -382,6 +378,27 @@
             if (result.isConfirmed) {
               Swal.close();
               window.open(`/inbox/videoCall/${redirectUrl}`,"_self");
+            } else {
+              socket.disconnect();
+              console.log("Call cancelled");
+            }
+          })
+      }
+
+      function audioCallRequestAlertBox(text, redirectUrl){
+        Swal.fire({
+            text: `${text} sent request for audio calling....`,
+            imageUrl: '/images/headphone.png',
+            imageWidth: 60,
+            imageHeight: 60,
+            imageAlt: 'Custom image',
+            showCancelButton: true,
+            confirmButtonText: 'Accept',
+            cancelButtonText: 'Reject',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              Swal.close();
+              window.open(`/inbox/audioCall/${redirectUrl}`,"_self");
             } else {
               socket.disconnect();
               console.log("Call cancelled");

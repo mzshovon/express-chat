@@ -1,5 +1,5 @@
 const express = require('express');
-const {getInbox, searchUser, sendMessage, addConversation, getMessages, videoCall, getRoom, blockUser} = require('../controllers/inboxConrtoller');
+const {getInbox, searchUser, sendMessage, addConversation, getMessages, videoCall, audioCall, getRoom, blockUser, getAudioRoom} = require('../controllers/inboxConrtoller');
 const decorateHtmlResponse = require('../middlewares/common/decorateHtmlRespose');
 const {checkLogin} = require('../middlewares/common/checkLogin');
 const attachmentUpload = require('../middlewares/inbox/attachmentUpload');
@@ -27,6 +27,9 @@ router.post("/block", checkLogin, blockUser);
 
 router.get("/videoCall", decorateHtmlResponse(page_title), checkLogin, videoCall);
 
+router.get("/audioCall", decorateHtmlResponse(page_title), checkLogin, audioCall);
+
 router.get("/videoCall/:room", decorateHtmlResponse(page_title), checkLogin, getRoom);
+router.get("/audioCall/:room", decorateHtmlResponse(page_title), checkLogin, getAudioRoom);
 
 module.exports = router;
