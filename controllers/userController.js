@@ -5,11 +5,21 @@ const path = require("path");
 
 async function getUsers(req, res, next) {
     try {
-        const users = await User.find({});
-        res.render("users", {
-            title: "User - Express Chat Application",
-            users : users
-        });
+        if(req.user.role == "admin") {
+            const users = await User.find({});
+            res.render("users", {
+                title: "User - Express Chat Application",
+                users : users
+            });
+        } else {
+            res.status(401).json({
+                errors : {
+                    common : {
+                        message : "Unauthorized Action!"
+                    }
+                }
+            })
+        }
     } catch (error) {
         next(error);
     }

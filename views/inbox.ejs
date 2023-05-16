@@ -225,12 +225,16 @@
               let callSection = `<span style="float:right"><i class="fa-solid fa-phone" style="color:white;background: #6a6ab1;
                                         padding: 7px 10px;
                                         border: 2px solid;
-                                        margin: 0px 17px;
                                         border-radius: 10px;" onclick="startAudioCall('${participant.id}','${participant.name}', '${conversation_id}')"></i>
                                         <i class="fa-solid fa-video-camera" style="color:white;background: #6a6ab1;
                                         padding: 7px 10px;
                                         border: 2px solid;
                                         border-radius: 10px;" onclick="startVideoCall('${participant.id}','${participant.name}', '${conversation_id}')"></i>
+                                        <i class="fa-solid fa-trash" style="color:white;background: #6a6ab1;
+                                        padding: 7px 10px;
+                                        margin: 0px 17px;
+                                        border: 2px solid;
+                                        border-radius: 10px;" onclick="deleteMessages('${conversation_id}')"></i>
                                         </span>`;
               chatTitleContainer.textContent = current_conversation_name;
               chatTitleContainer.innerHTML = `${current_conversation_name} ${blockButton} ${callSection} ${typingDisplay}`;
@@ -346,6 +350,42 @@
       async function startAudioCall(participantId, participantName, conversation_id){
         let randomizeUrlCall = `${loggedinuserId}!${Math.random()}!.${conversation_id}`;
         window.open(`/inbox/audioCall/${randomizeUrlCall}`,"_blank");
+      }
+
+      function deleteMessages(conversation_id){
+        Swal.fire({
+            icon: 'warning',
+            title: 'Are sure delete it?',
+            showCancelButton: true,
+            confirmButtonText: 'Delete',
+            cancelButtonText: 'Cancel',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              confirmDelete(conversation_id);
+            }
+          })
+      }
+
+      async function confirmDelete(conversationId) {
+        let response = await fetch("/inbox/deleteMessages", {
+            method: "POST",
+            body: JSON.stringify({
+              conversation_id: conversationId
+            }),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+          });
+          const result = await response.json();
+          if(!result.errors) {
+            Swal.fire("Successfully Deleted!", "", "success");
+            setTimeout(() => {
+              location.reload();
+            }, 2000);
+          } else {
+            Swal.fire(`${result.errors.common.message}`, "", "error");
+          }
+
       }
 
       async function formSubmitOnSendMessage(formData, formDataHeader = false){

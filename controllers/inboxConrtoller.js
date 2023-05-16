@@ -224,6 +224,40 @@ async function sendMessage(req, res, next) {
   }
 }
 
+// send new message
+async function deleteMessages(req, res, next) {
+  try {
+    const conversation_id = req.body.conversation_id;
+    const conversation = await Conversation.findOne({
+      _id: conversation_id,
+    });
+    if ((conversation?.creator?.id ||  conversation?.participant?.id) == req.user.userId) {
+      const deleteMessages = await Message.deleteMany(
+        {conversation_id : conversation_id}
+      );
+      res.status(200).json({
+        message: "Successfully Deleted!",
+      });
+    } else {
+      res.status(401).json({
+        errors: {
+          common: {
+            message: "Unauthorized User!",
+          },
+        },
+      });
+    } 
+  } catch (err) {
+    res.status(500).json({
+      errors: {
+        common: {
+          message: "Unknows error occured!",
+        },
+      },
+    });
+  }
+}
+
   // search user
 async function blockUser(req, res, next) {
   const userId = req.body.participantId;
@@ -312,6 +346,7 @@ module.exports = {
     getMessages,
     addConversation,
     sendMessage,
+    deleteMessages,
     blockUser,
     videoCall,
     audioCall,
