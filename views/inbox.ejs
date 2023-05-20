@@ -123,15 +123,15 @@
 
           // do not show avatar for loggedin user
           if(data.message.sender.id == loggedinuserId) {
-            messageHTML = `<div class="message-row ${messageClass}"><div class="message-content">
-              <div class="message-text">${data.message.message}</div>
+            messageHTML = `<div class="message-row ${messageClass}" ondblclick="popUpModal('${data.message.conversation_id}', '${data.message.newMessageId}');"><div class="message-content">
+              <div class="message-text show-content-message-${data.message.newMessageId}">${data.message.message}</div>
               ${attachments}
               <div class="message-time">${moment(data.message.date_time).fromNow()}</div>
             </div></div>`;
           } else {
-            messageHTML = `<div class="message-row ${messageClass}"><div class="message-content">
+            messageHTML = `<div class="message-row ${messageClass}" ondblclick="popUpModal('${data.message.conversation_id}', '${data.message.newMessageId}');"><div class="message-content">
               ${senderAvatar}
-              <div class="message-text">${data.message.message}</div>
+              <div class="message-text show-content-message-${data.message.newMessageId}">${data.message.message}</div>
               ${attachments}
               <div class="message-time">${moment(data.message.date_time).fromNow()}</div>
             </div></div>`;
@@ -191,9 +191,9 @@
                   attachments += '</div>';
 
                   // final message html
-                  let messageHTML = `<div class="message-row ${messageClass}"><div class="message-content">
+                  let messageHTML = `<div class="message-row ${messageClass}" ondblclick="popUpModal('${conversation_id}', '${message._id}');" ><div class="message-content">
                       ${showAvatar}
-                      <div class="message-text">${message.text}</div>
+                      <div class="message-text show-content-message-${message._id}"> ${message.isDeleted === true ? message.deletedMessage : message.text}</div>
                       ${attachments}
                       <div class="message-time">${moment(message.date_time).fromNow()}</div>
                     </div></div>`;
@@ -330,6 +330,26 @@
           socket.emit('typing', {user:user, typing:false})
       }
 
+      function popUpModal(conversationId, messageId){
+        Swal.fire({
+          title: 'Want to delete the message?',
+          showCancelButton: true,
+          confirmButtonText: 'Delete',
+          cancelButtonText: 'Cancel',
+        }).then((result) => {
+          /* Read more about isConfirmed, isDenied below */
+          if (result.isConfirmed) {
+            let deleteUrl = `/inbox/deleteMessages?messageId=${messageId}`;
+            confirmDelete(conversationId, deleteUrl, messageId);
+          }
+        })
+      }
+
+      socket.on("single_message_delete", data => {
+        const contentClassElement = document.getElementsByClassName(`show-content-message-${data.messageId}`);
+        contentClassElement[0].innerHTML = "<small><i> Message is deleted! </i></small>" ;
+      })
+
       socket.on("video_call_request", data => {
         if(data.videoRecieverInfo.receiverId == loggedinuserId) {
           videoCallRequestAlertBox(data.videoRecieverInfo.callerInfo.name, data.videoRecieverInfo.redirectUrl);
@@ -361,13 +381,14 @@
             cancelButtonText: 'Cancel',
           }).then((result) => {
             if (result.isConfirmed) {
-              confirmDelete(conversation_id);
+              let deleteUrl = "/inbox/deleteMessages";
+              confirmDelete(conversation_id, deleteUrl);
             }
           })
       }
 
-      async function confirmDelete(conversationId) {
-        let response = await fetch("/inbox/deleteMessages", {
+      async function confirmDelete(conversationId, url, messageId = null) {
+        let response = await fetch(url, {
             method: "POST",
             body: JSON.stringify({
               conversation_id: conversationId
@@ -379,13 +400,17 @@
           const result = await response.json();
           if(!result.errors) {
             Swal.fire("Successfully Deleted!", "", "success");
-            setTimeout(() => {
+            if(messageId) {
+              const contentClassElement = document.getElementsByClassName(`show-content-message-${messageId}`);
+              contentClassElement[0].innerHTML = "<small><i> Message is deleted! </i></small>" ;
+            } else {
+              setTimeout(() => {
               location.reload();
             }, 2000);
+            }
           } else {
             Swal.fire(`${result.errors.common.message}`, "", "error");
           }
-
       }
 
       async function formSubmitOnSendMessage(formData, formDataHeader = false){

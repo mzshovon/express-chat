@@ -1,12 +1,13 @@
 // external imports
 const createError = require("http-errors");
+const { Configuration, OpenAIApi } = require("openai");
 // internal imports
 const User = require("../models/Peoples");
 const {v4 : uuidV4} = require('uuid');
 const Conversation = require("../models/Conversation");
 const Message = require("../models/Message");
 const escape = require("../utilites/escape");
-
+const People = require("../models/Peoples");
 
 async function getInbox(req, res, next) {
     try {
@@ -15,6 +16,9 @@ async function getInbox(req, res, next) {
             { "creator.id": req.user.userId },
             { "participant.id": req.user.userId },
           ],
+          $and : [{
+            isFriend : true
+          }]
         });
         res.locals.data = conversations;
         res.render("inbox");
@@ -88,7 +92,6 @@ async function addConversation(req, res, next) {
         profile_image: req.body.profile_image || null,
       },
     });
-    console.log(newConversation, 'test');
     const findAlreadyExistsConversation = await Conversation.find({
       $and : [
         {
@@ -197,11 +200,50 @@ async function sendMessage(req, res, next) {
             profile_image: req.user.profile_image || null,
           },
           message: req.body.message,
+          newMessageId : newMessage._id,
           attachment: attachments,
           date_time: result.date_time,
         },
       });
-      // console.log(result);
+
+      const roleCheckOfReciever = await People.findOne({_id : req.body.receiverId}).select("-_id role").then(
+        async(data) => {
+        if(data.role == "chatbot") {
+          const returnChatBotReply = await chatWithChatBot(req.body.message);
+  
+          const newReturnMessage = new Message({
+            text: returnChatBotReply,
+            attachment: null,
+            sender: {
+              id: req.body.receiverId,
+              name: req.body.receiverName,
+              profile_image: req.body.profile_image || null,
+            },
+            receiver: {
+              id: req.user.userId,
+              name: req.user.username,
+              profile_image: req.user.profile_image || null,
+            },
+            conversation_id: req.body.conversationId,
+          });
+    
+          const result = await newReturnMessage.save();
+  
+          global.io.emit("new_message", {
+            message: {
+              conversation_id: req.body.conversationId,
+              sender: {
+                id: req.user.receiverId,
+                name: req.user.receiverName,
+                profile_image: req.user.profile_image || null,
+              },
+              message: returnChatBotReply,
+              attachment: null,
+              date_time: result.date_time,
+            },
+          });
+        }
+      });
       res.status(200).json({
         message: "Successful!",
         data: result,
@@ -231,10 +273,19 @@ async function deleteMessages(req, res, next) {
     const conversation = await Conversation.findOne({
       _id: conversation_id,
     });
-    if ((conversation?.creator?.id ||  conversation?.participant?.id) == req.user.userId) {
-      const deleteMessages = await Message.deleteMany(
-        {conversation_id : conversation_id}
-      );
+    if ((conversation?.creator?.id) == req.user.userId || (conversation?.participant?.id) == req.user.userId) {
+      if(req.query.messageId) {
+        const deleteMessages = await Message.findByIdAndUpdate(
+          {_id : req.query.messageId}, {isDeleted : true, deletedMessage: "<small><i> Message is deleted! </i></small>"}
+        );
+        global.io.emit("single_message_delete", {
+          "messageId" : req.query.messageId
+        });
+      } else {
+        const deleteMessages = await Message.deleteMany(
+          {conversation_id : conversation_id}
+        );
+      }
       res.status(200).json({
         message: "Successfully Deleted!",
       });
@@ -295,6 +346,7 @@ async function blockUser(req, res, next) {
     });
   }
 }
+
 async function getRoom(req,res) {
   const urlParamElements = req.params.room.split("!");
   const callerId = urlParamElements[0];
@@ -338,6 +390,19 @@ async function videoCall(req,res,next) {
 async function audioCall(req,res,next) {
   res.redirect(`/inbox/audioCall/${uuidV4()}`);
   // res.render('audioRoom');
+}
+
+async function chatWithChatBot(message, options = false) {
+  // OpenAI configure
+    const openAIConfiguration = new Configuration({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    const openai = new OpenAIApi(openAIConfiguration);
+    const completion = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{role: "user", content: message}]
+    });
+    return completion.data.choices[0].message.content;
 }
 
 module.exports = {

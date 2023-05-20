@@ -1,0 +1,64 @@
+<%- include('./partials/header.ejs'); %>
+    <div class="manageUser-container">
+      <div id="title">
+        <h2>Friend Requests</h2>
+      </div>
+
+      <div id="users-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Manage</th>
+            </tr>
+          </thead>
+          <tbody id="users-table">
+            <% data.forEach(function(conversation){%>
+            <tr id="<%= conversation.creator.id %>">
+              <td class="name">
+                <span><%= conversation.creator.name %></span>
+              </td>
+              <td><span class="success-badge"><%= conversation.creator.status %></span></td>
+              <td class="manage">
+                <i class="fa fa-check success-icon" onclick="acceptOrRejectFriendRequest('<%= conversation._id %>','<%= conversation.creator.id %>', 'accept')"></i>
+                <i class="fa fa-ban danger-icon" onclick="acceptOrRejectFriendRequest('<%= conversation._id %>','<%= conversation.creator.id %>', 'reject')"></i>
+              </td>
+            </tr>
+            <% });%>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+
+      async function acceptOrRejectFriendRequest(conversationId, participantId, responseStatus)
+      {
+        let response = await fetch("/friendRequests/acceptOrReject", {
+            method: "POST",
+            body: JSON.stringify({
+              conversationId: conversationId,
+              participantId: participantId,
+              responseStatus: responseStatus,
+            }),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+          });
+          const result = await response.json();
+          if(!result.errors) {
+            Swal.fire(result.message, "", "success");
+          } else {
+            Swal.fire(`${result.errors.common.message}`, "", "error");
+          }
+          setTimeout(() => {
+              location.reload();
+            }, 2000);
+      }
+
+    </script>
+
+  </body>
+</html>

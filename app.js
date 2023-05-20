@@ -12,6 +12,7 @@ const moment = require('moment');
 const loginRouter = require('./router/loginRouter');
 const usersRouter = require('./router/usersRouter');
 const inboxRouter = require('./router/inboxRouter');
+const friendRequestRouter = require('./router/friendRequestRouter');
 const facebookRouter = require('./router/facebookRouter');
 
 //Internal imports
@@ -64,6 +65,7 @@ app.use('/', loginRouter);
 app.use('/users', usersRouter);
 app.use('/inbox', inboxRouter);
 app.use('/facebook', facebookRouter);
+app.use('/friendRequests', friendRequestRouter);
 
 const peerServer = PeerServer({port : 9191, path: "/peerjs"});
 

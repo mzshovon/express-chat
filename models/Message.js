@@ -28,6 +28,13 @@ const messageSchema = mongoose.Schema(
       type: mongoose.Types.ObjectId,
       required: true,
     },
+    isDeleted: {
+      type : Boolean,
+      default : false
+    },
+    deletedMessage: {
+      type : String,
+    },
   },
   {
     timestamps: true,

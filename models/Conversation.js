@@ -17,6 +17,10 @@ const conversationSchema = mongoose.Schema(
       avatar: String,
       blockedBy : String
     },
+    isFriend : {
+      type: Boolean,
+      default : false
+    },
     last_updated: {
       type: Date,
       default: Date.now,
