@@ -67,7 +67,7 @@ app.use('/inbox', inboxRouter);
 app.use('/facebook', facebookRouter);
 app.use('/friendRequests', friendRequestRouter);
 
-const peerServer = PeerServer({port : 4343, path: "/"});
+const peerServer = PeerServer({port : 9191, path: "/peerjs"});
 
 io.on('connection', socket => {
     socket.on('join-room', (roomId, userId) => {

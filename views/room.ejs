@@ -136,14 +136,13 @@
       myVideo.muted = true;
       var peer = new Peer(undefined, {
         host: "/",
-        path: "/",
-        port: 4343
+        path: "/peerjs",
+        port: 9191
         // config: {'iceServers': [
         //   { url: 'stun:stun.l.google.com:19302' },
         //   { url: 'turn:homeo@turn.bistri.com:80', credential: 'homeo' }
         // ]} 
       });
-      console.log("peers", peer);
       const peers = {};
       let myVideoStream;
       navigator.mediaDevices
